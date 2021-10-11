@@ -29,7 +29,7 @@ The data files are not included in this repository due to their large size. You 
 
 ```bash
 wget http://www.comp.nus.edu.sg/~cs4224/project_files_3.zip
-unzip project-files.zip
+unzip project_files_3.zip
 ```
 
 Now, you should see a folder called `project_files_3` in the project's root folder.
