@@ -2,11 +2,12 @@
 
 ## Setup
 
-1. Install Cassandra
+### Install Cassandra
+
 Please refer to the installation instructions from Cassandra docs:
 http://cassandra.apache.org/doc/latest/cassandra/getting_started/installing.html
 
-2. Install Python dependencies
+### Install Python dependencies
 
 a) Using pipenv
 ```
