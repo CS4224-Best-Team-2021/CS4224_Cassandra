@@ -16,7 +16,7 @@ def main():
     print(f'keyspace {KEYSPACES[0]} has been created')
     
     # create tables
-    for table in [Warehouse, District, Customer, Order, Item, OrderLine, Stock]:
+    for table in [Warehouse, District, Customer, CustomerOrder, Item, OrderLine, Stock]:
         sync_table(table, KEYSPACES, connections)
         print(f'Table {table} has been created')
 
@@ -68,10 +68,10 @@ class Customer(Model):
     C_DELIVERY_CNT = columns.Integer()
     C_DATA = columns.Text(max_length=500) 
 
-class Order(Model):
+class CustomerOrder(Model):
     O_W_ID = columns.Integer(partition_key=True)
     O_D_ID = columns.Integer(partition_key=True)
-    O_ID = columns.Integer(partition_key=True)
+    O_ID = columns.Integer(primary_key=True)
     O_C_ID = columns.Integer()
     O_CARRIER_ID = columns.Integer()
     O_OL_CNT = columns.Decimal()
@@ -79,7 +79,7 @@ class Order(Model):
     O_ENTRY_D = columns.DateTime()
 
 class Item(Model):
-    I_ID = columns.Integer(partition_key=True)
+    I_ID = columns.Integer(primary_key=True)
     I_NAME = columns.Text(max_length=24)
     I_PRICE = columns.Decimal()
     I_IM_ID = columns.Integer()
@@ -89,7 +89,7 @@ class OrderLine(Model):
     OL_W_ID = columns.Integer(partition_key=True)
     OL_D_DID = columns.Integer(partition_key=True)
     OLD_O_ID = columns.Integer(partition_key=True)
-    OL_NUMBER = columns.Integer(partition_key=True)
+    OL_NUMBER = columns.Integer(primary_key=True)
     OL_I_ID = columns.Integer()
     OL_DELIVERY_D = columns.DateTime()
     OL_AMOUNT = columns.Decimal()
