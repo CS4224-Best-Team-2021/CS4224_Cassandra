@@ -20,6 +20,7 @@ def main():
         sync_table(table, KEYSPACES, connections)
         print(f'Table {table} has been created')
 
+# Schema
 class Warehouse(Model):
     W_ID = columns.Integer(primary_key=True)
     W_NAME = columns.Text(max_length=10)
@@ -42,22 +43,48 @@ class District(Model):
     D_ZIP = columns.Text(max_length=9)
     D_TAX = columns.Decimal()
     D_YTD = columns.Decimal()
+    D_NEXT_O_ID = columns.Integer()
     
 class Customer(Model):
     C_W_ID = columns.Integer(partition_key=True)
     C_D_ID = columns.Integer(partition_key=True)
     C_ID = columns.Integer(partition_key=True)
-    
+    C_FIRST = columns.Text(max_length=16) 
+    C_MIDDLE = columns.Text(max_length=2) 
+    C_LAST = columns.Text(max_length=20)
+    C_STREET_1 = columns.Text(max_length=20)
+    C_STREET_2 = columns.Text(max_length=20)
+    C_CITY = columns.Text(max_length=20)
+    C_STATE = columns.Text(max_length=2)
+    C_ZIP = columns.Text(max_length=9)
+    C_PHONE = columns.Text(max_length=16)
+    C_SINCE = columns.DateTime()
+    C_CREDIT = columns.Text(max_length=2)
+    C_CREDIT_LIM = columns.Decimal()
+    C_DISCOUNT = columns.Decimal()
+    C_BALANCE = columns.Decimal()
+    C_YTD_PAYMENT = columns.Float()
+    C_PAYMENT_CNT = columns.Integer()
+    C_DELIVERY_CNT = columns.Integer()
+    C_DATA = columns.Text(max_length=500) 
 
 class Order(Model):
     O_W_ID = columns.Integer(partition_key=True)
     O_D_ID = columns.Integer(partition_key=True)
     O_ID = columns.Integer(partition_key=True)
-
+    O_C_ID = columns.Integer()
+    O_CARRIER_ID = columns.Integer()
+    O_OL_CNT = columns.Decimal()
+    O_ALL_LOCAL = columns.Decimal()
+    O_ENTRY_D = columns.DateTime()
 
 class Item(Model):
     I_ID = columns.Integer(partition_key=True)
-
+    I_NAME = columns.Text(max_length=24)
+    I_PRICE = columns.Decimal()
+    I_IM_ID = columns.Integer()
+    I_DATA = columns.Text(max_length=50)
+     
 class OrderLine(Model):
     OL_W_ID = columns.Integer(partition_key=True)
     OL_D_DID = columns.Integer(partition_key=True)
