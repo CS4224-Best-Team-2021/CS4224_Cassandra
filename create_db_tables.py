@@ -90,11 +90,31 @@ class OrderLine(Model):
     OL_D_DID = columns.Integer(partition_key=True)
     OLD_O_ID = columns.Integer(partition_key=True)
     OL_NUMBER = columns.Integer(partition_key=True)
+    OL_I_ID = columns.Integer()
+    OL_DELIVERY_D = columns.DateTime()
+    OL_AMOUNT = columns.Decimal()
+    OL_SUPPLY_W_ID = columns.Integer()
+    OL_QUANTITY = columns.Decimal()
+    OL_DIST_INFO = columns.Text(max_length=24)
 
 class Stock(Model):
     S_W_ID = columns.Integer(partition_key=True)
     S_I_ID =  columns.Integer(partition_key=True)
-
+    S_QUANTITY = columns.Decimal()
+    S_YTD = columns.Decimal()
+    S_ORDER_CNT = columns.Integer()
+    S_REMOTE_CNT = columns.Integer()
+    S_DIST_01 = columns.Text(max_length=24)
+    S_DIST_02 = columns.Text(max_length=24)
+    S_DIST_03 = columns.Text(max_length=24)
+    S_DIST_04 = columns.Text(max_length=24)
+    S_DIST_05 = columns.Text(max_length=24)
+    S_DIST_06 = columns.Text(max_length=24)
+    S_DIST_07 = columns.Text(max_length=24)
+    S_DIST_08 = columns.Text(max_length=24)
+    S_DIST_09 = columns.Text(max_length=24)
+    S_DIST_10 = columns.Text(max_length=24)
+    S_DATA = columns.Text(max_length=50)
 
 if __name__ == "__main__":
     main()
