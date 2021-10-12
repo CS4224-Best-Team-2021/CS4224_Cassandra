@@ -1,12 +1,11 @@
 from cassandra.cqlengine.management import create_keyspace_simple, sync_table
 from cassandra.cqlengine import connection
-from cassandra.cqlengine import columns
-from cassandra.cqlengine.models import Model
+from schema import TABLES
+
+KEYSPACES = ['cs4224_keyspace']
+IP_ADDRESSES = ['127.0.0.1']
 
 def main():
-    KEYSPACES = ['cs4224_keyspace']
-    IP_ADDRESSES = ['127.0.0.1']
-    
     # create cluster
     connection.register_connection('default', IP_ADDRESSES)
     connections=['default']
@@ -16,105 +15,9 @@ def main():
     print(f'keyspace {KEYSPACES[0]} has been created')
     
     # create tables
-    for table in [Warehouse, District, Customer, CustomerOrder, Item, OrderLine, Stock]:
+    for table in TABLES:
         sync_table(table, KEYSPACES, connections)
         print(f'Table {table} has been created')
-
-# Schema
-class Warehouse(Model):
-    W_ID = columns.Integer(primary_key=True)
-    W_NAME = columns.Text(max_length=10)
-    W_STREET_1 = columns.Text(max_length=20)
-    W_STREET_2 = columns.Text(max_length=20)
-    W_CITY = columns.Text(max_length=20)
-    W_STATE = columns.Text(max_length=2)
-    W_ZIP = columns.Text(max_length=9)
-    W_TAX = columns.Decimal()
-    W_YTD = columns.Decimal()
-
-class District(Model):
-    D_W_ID = columns.Integer(partition_key=True)
-    D_ID = columns.Integer(partition_key=True)
-    D_NAME = columns.Text(max_length=10)
-    D_STREET_1 = columns.Text(max_length=20)
-    D_STREET_2 = columns.Text(max_length=20)
-    D_CITY = columns.Text(max_length=20)
-    D_STATE = columns.Text(max_length=2)
-    D_ZIP = columns.Text(max_length=9)
-    D_TAX = columns.Decimal()
-    D_YTD = columns.Decimal()
-    D_NEXT_O_ID = columns.Integer()
-    
-class Customer(Model):
-    C_W_ID = columns.Integer(partition_key=True)
-    C_D_ID = columns.Integer(partition_key=True)
-    C_ID = columns.Integer(partition_key=True)
-    C_FIRST = columns.Text(max_length=16) 
-    C_MIDDLE = columns.Text(max_length=2) 
-    C_LAST = columns.Text(max_length=20)
-    C_STREET_1 = columns.Text(max_length=20)
-    C_STREET_2 = columns.Text(max_length=20)
-    C_CITY = columns.Text(max_length=20)
-    C_STATE = columns.Text(max_length=2)
-    C_ZIP = columns.Text(max_length=9)
-    C_PHONE = columns.Text(max_length=16)
-    C_SINCE = columns.DateTime()
-    C_CREDIT = columns.Text(max_length=2)
-    C_CREDIT_LIM = columns.Decimal()
-    C_DISCOUNT = columns.Decimal()
-    C_BALANCE = columns.Decimal()
-    C_YTD_PAYMENT = columns.Float()
-    C_PAYMENT_CNT = columns.Integer()
-    C_DELIVERY_CNT = columns.Integer()
-    C_DATA = columns.Text(max_length=500) 
-
-class CustomerOrder(Model):
-    O_W_ID = columns.Integer(partition_key=True)
-    O_D_ID = columns.Integer(partition_key=True)
-    O_ID = columns.Integer(primary_key=True)
-    O_C_ID = columns.Integer()
-    O_CARRIER_ID = columns.Integer()
-    O_OL_CNT = columns.Decimal()
-    O_ALL_LOCAL = columns.Decimal()
-    O_ENTRY_D = columns.DateTime()
-
-class Item(Model):
-    I_ID = columns.Integer(primary_key=True)
-    I_NAME = columns.Text(max_length=24)
-    I_PRICE = columns.Decimal()
-    I_IM_ID = columns.Integer()
-    I_DATA = columns.Text(max_length=50)
-     
-class OrderLine(Model):
-    OL_W_ID = columns.Integer(partition_key=True)
-    OL_D_DID = columns.Integer(partition_key=True)
-    OLD_O_ID = columns.Integer(partition_key=True)
-    OL_NUMBER = columns.Integer(primary_key=True)
-    OL_I_ID = columns.Integer()
-    OL_DELIVERY_D = columns.DateTime()
-    OL_AMOUNT = columns.Decimal()
-    OL_SUPPLY_W_ID = columns.Integer()
-    OL_QUANTITY = columns.Decimal()
-    OL_DIST_INFO = columns.Text(max_length=24)
-
-class Stock(Model):
-    S_W_ID = columns.Integer(partition_key=True)
-    S_I_ID =  columns.Integer(partition_key=True)
-    S_QUANTITY = columns.Decimal()
-    S_YTD = columns.Decimal()
-    S_ORDER_CNT = columns.Integer()
-    S_REMOTE_CNT = columns.Integer()
-    S_DIST_01 = columns.Text(max_length=24)
-    S_DIST_02 = columns.Text(max_length=24)
-    S_DIST_03 = columns.Text(max_length=24)
-    S_DIST_04 = columns.Text(max_length=24)
-    S_DIST_05 = columns.Text(max_length=24)
-    S_DIST_06 = columns.Text(max_length=24)
-    S_DIST_07 = columns.Text(max_length=24)
-    S_DIST_08 = columns.Text(max_length=24)
-    S_DIST_09 = columns.Text(max_length=24)
-    S_DIST_10 = columns.Text(max_length=24)
-    S_DATA = columns.Text(max_length=50)
 
 if __name__ == "__main__":
     main()
