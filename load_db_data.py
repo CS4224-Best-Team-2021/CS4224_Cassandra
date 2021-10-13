@@ -24,13 +24,18 @@ def main():
 def parse_date_time(time_string):
     return datetime.strptime(time_string, '%Y-%m-%d %H:%M:%S.%f')
                 
+# count is used for mock data, uncomment the lines if you only need mock data
 def load_data_to_table(index):
     with open(PATH_TO_DATA_FOLDER + DATA_FILES[index]) as data_file:
         file_reader = csv.reader(data_file, delimiter=',')
         current_table = TABLES[index]
         keys = current_table().keys()
+        count = 0
         
         for row in file_reader:
+            if count >= 15:
+                break
+            count += 1
             records_dict = {}
             for i in range(len(keys)):
                 if row[i] == 'null':
