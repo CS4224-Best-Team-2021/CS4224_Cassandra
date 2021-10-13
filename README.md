@@ -28,8 +28,8 @@ pip install cassandra-driver
 The data files are not included in this repository due to their large size. You may either download and extract them manually, or run the following commands in the project's root.
 
 ```bash
-wget http://www.comp.nus.edu.sg/~cs4224/project_files_3.zip
-unzip project_files_3.zip
+wget http://www.comp.nus.edu.sg/~cs4224/project_files_4.zip
+unzip project_files_4.zip
 ```
 
-Now, you should see a folder called `project_files_3` in the project's root folder.
+Now, you should see a folder called `project_files_4` in the project's root folder.
