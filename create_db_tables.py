@@ -1,6 +1,6 @@
+from schema import TABLES
 from cassandra.cqlengine.management import create_keyspace_simple, sync_table
 from cassandra.cqlengine import connection
-from schema import TABLES
 
 KEYSPACES = ['cs4224_keyspace']
 IP_ADDRESSES = ['127.0.0.1']
