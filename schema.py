@@ -25,13 +25,13 @@ class District(Model):
     D_TAX = columns.Decimal()
     D_YTD = columns.Decimal()
     D_NEXT_O_ID = columns.Integer()
-    
+
 class Customer(Model):
     C_W_ID = columns.Integer(partition_key=True)
     C_D_ID = columns.Integer(partition_key=True)
     C_ID = columns.Integer(partition_key=True)
-    C_FIRST = columns.Text(max_length=16) 
-    C_MIDDLE = columns.Text(max_length=2) 
+    C_FIRST = columns.Text(max_length=16)
+    C_MIDDLE = columns.Text(max_length=2)
     C_LAST = columns.Text(max_length=20)
     C_STREET_1 = columns.Text(max_length=20)
     C_STREET_2 = columns.Text(max_length=20)
@@ -47,7 +47,7 @@ class Customer(Model):
     C_YTD_PAYMENT = columns.Float()
     C_PAYMENT_CNT = columns.Integer()
     C_DELIVERY_CNT = columns.Integer()
-    C_DATA = columns.Text(max_length=500) 
+    C_DATA = columns.Text(max_length=500)
 
 class CustomerOrder(Model):
     O_W_ID = columns.Integer(partition_key=True)
@@ -65,11 +65,11 @@ class Item(Model):
     I_PRICE = columns.Decimal()
     I_IM_ID = columns.Integer()
     I_DATA = columns.Text(max_length=50)
-     
+
 class OrderLine(Model):
     OL_W_ID = columns.Integer(partition_key=True)
-    OL_D_DID = columns.Integer(partition_key=True)
-    OLD_O_ID = columns.Integer(partition_key=True)
+    OL_D_ID = columns.Integer(partition_key=True)
+    OL_O_ID = columns.Integer(partition_key=True)
     OL_NUMBER = columns.Integer(primary_key=True)
     OL_I_ID = columns.Integer()
     OL_DELIVERY_D = columns.DateTime(required=False)
