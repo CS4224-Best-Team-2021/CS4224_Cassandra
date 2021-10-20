@@ -32,11 +32,12 @@ def execute_transaction(transaction_folder_path, file_number):
             
             if transaction_type == "N":
                 c_id,w_id,d_id, M = line_parts[1:]
+                num_items = int(M)
                 item_number = []
                 supplier_warehouse = []
                 quantity = []
                 
-                for _ in range(int(M)):
+                for _ in range(num_items):
                     line = file.readline()
                     line_parts = line.split(',')
                     params = [eval(param) for param in line_parts]
@@ -44,7 +45,7 @@ def execute_transaction(transaction_folder_path, file_number):
                     supplier_warehouse.append(params[1])
                     quantity.append(params[2])
                     
-                new_order_transaction(int(c_id), int(w_id), int(d_id), item_number, supplier_warehouse, quantity)
+                new_order_transaction(int(c_id), int(w_id), int(d_id), num_items, item_number, supplier_warehouse, quantity)
             elif transaction_type == "P":
                 c_w_id, c_d_id, c_id, payment = line_parts[1:]
                 payment_transaction(int(c_w_id), int(c_d_id), int(c_id), float(payment))
