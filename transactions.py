@@ -6,6 +6,8 @@ import sys
 from cassandra import ConsistencyLevel
 from cassandra.cqlengine import connection
 
+# Deprecated. Use driver instead.
+"""
 def main():
     connection.setup(IP_ADDRESSES, KEYSPACES[0])
     first_line = sys.stdin.readline().split(',')
@@ -44,13 +46,14 @@ def main():
 
     # Test your functions using this script once it has been implemented
     # top_balance_transaction()
+"""
 
 READ_CONSISTENCY_LEVEL = ConsistencyLevel.ONE
 WRITE_CONSISTENCY_LEVEL = ConsistencyLevel.ALL
 
 # Note: We will need to pass in parameters to most of these functions
 # Write-heavy transactions
-def new_order_transaction(w_id, d_id, c_id, num_items):
+def new_order_transaction(w_id, d_id, c_id, num_items, item_number, supplier_warehouse, quantity):
     pass
 
 def payment_transaction(c_w_id, c_d_id, c_id, payment):
@@ -138,5 +141,7 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
     pass
 
 
+"""
 if __name__ == "__main__":
     main()
+"""
