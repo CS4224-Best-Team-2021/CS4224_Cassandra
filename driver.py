@@ -14,10 +14,12 @@ def main():
     connection.setup(IP_ADDRESSES, KEYSPACES[0])
     
     # TODO: Handle client numbers and file path more generally
+    print('executing transactions...')
     client_number = 0
     execute_transaction(PATH_A, 99)
     
     # Compute performance statistics     
+    print('computing performance statistics...')
     number_of_transactions_executed = len(transaction_times)
     total_transaction_execution_time = sum(transaction_times)
     transaction_throughput = number_of_transactions_executed / total_transaction_execution_time
@@ -36,7 +38,7 @@ def main():
                               median_transaction_latency,
                               percentile_95_transaction_latency,
                               percentile_99_transaction_latency])
-
+    print('performance statistics have been written to results/clients.csv')
     
 def execute_transaction(transaction_folder_path, file_number):
     file_path = f'{transaction_folder_path}/{file_number}.txt'
