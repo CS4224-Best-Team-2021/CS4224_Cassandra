@@ -2,51 +2,17 @@ from create_db_tables import IP_ADDRESSES, KEYSPACES
 from schema import *
 
 import sys
+import time
 
 from cassandra import ConsistencyLevel
 from cassandra.cqlengine import connection
 
 # Deprecated. Use driver instead.
-"""
 def main():
     connection.setup(IP_ADDRESSES, KEYSPACES[0])
-    first_line = sys.stdin.readline().split(',')
-    try:
-        t_type = first_line[0].strip()
-        if t_type == "N":
-            type,c_id,w_id,d_id, M = first_line
-            new_order_transaction(int(c_id), int(w_id), int(d_id), int(M))
-        elif t_type == "P":
-            type, c_w_id, c_d_id, c_id, payment = first_line
-            payment_transaction(int(c_w_id), int(c_d_id), int(c_id), float(payment))
-        elif t_type == "D":
-            type, w_id, carrier_id = first_line
-            delivery_transaction(int(w_id), int(carrier_id))
-        elif t_type == "O":
-            type, c_w_id, c_d_id, c_id = first_line
-            order_status_transaction(int(c_w_id), int(c_d_id), int(c_id))
-        elif t_type == "S":
-            type, w_id, d_id, T, L = first_line
-            stock_level_transaction(int(w_id), int(d_id), int(T), int(L))
-        elif t_type == "I":
-            type, w_id, d_id, L = first_line
-            popular_item_transaction(int(w_id), int(d_id), int(L))
-        elif t_type == "T":
-            top_balance_transaction()
-        elif t_type == "R":
-            type, c_w_id, c_d_id, c_id = first_line
-            related_customer_transaction(int(c_w_id), int(c_d_id), int(c_id))
-        else:
-            raise ValueError("Invalid transaction type specified.")
-    except ValueError as e1:
-        raise ValueError("Invalid transaction type specified.")
-    except IndexError as e2:
-        raise EOFError("No input detected.")
-
-
     # Test your functions using this script once it has been implemented
-    # top_balance_transaction()
-"""
+    top_balance_transaction()
+    related_customer_transaction(1, 1, 1)
 
 READ_CONSISTENCY_LEVEL = ConsistencyLevel.ONE
 WRITE_CONSISTENCY_LEVEL = ConsistencyLevel.ALL
@@ -202,8 +168,46 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
     print("Related customers <C_W_ID>, <C_D_ID>, <C_ID>")
     for wid, did, cid in neighbours:
         print(f"{wid}, {did}, {cid}")
+        
+        
+# Attempt 3: Faster than Attempt 2
+def related_customer_transaction(c_w_id, c_d_id, c_id):
+    # start = time.time()
+    # print(f'executing related_customer_transaction 3')
+    # Processing steps
+    c_item_set_list = []
+    c_orders = CustomerOrder.objects().allow_filtering().filter(O_W_ID=c_w_id, O_D_ID=c_d_id, O_C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL)
+    for c_order in c_orders:
+        c_item_set = set()
+        c_order_lines = OrderLine.filter(OL_W_ID=c_w_id, OL_D_ID=c_d_id, OL_O_ID=c_order.O_ID).consistency(READ_CONSISTENCY_LEVEL)
+        for c_order_line in c_order_lines:
+            c_item_set.add(c_order_line.OL_I_ID)
+        c_item_set_list.append(c_item_set)
 
-"""
+    neighbours = set()
+
+    customer_orders = CustomerOrder.all()
+    for customer_order in customer_orders:
+        if c_w_id != customer_order.O_W_ID:
+            other_item_set = set()
+            other_order_lines = OrderLine.filter(OL_W_ID=customer_order.O_W_ID, OL_D_ID=customer_order.O_D_ID, OL_O_ID=customer_order.O_ID).consistency(
+                READ_CONSISTENCY_LEVEL)
+            for other_order_line in other_order_lines:
+                other_item_set.add(other_order_line.OL_I_ID)
+                
+            for c_item_set in c_item_set_list:
+                if len(c_item_set.intersection(other_item_set)) >= 2:
+                    neighbours.add((customer_order.O_W_ID, customer_order.O_D_ID, customer_order.O_C_ID))
+                    break
+
+    # Print output
+    print("Customer <C_W_ID>, <C_D_ID>, <C_ID>")
+    print(f"{c_w_id}, {c_d_id}, {c_id}")
+    print("Related customers <C_W_ID>, <C_D_ID>, <C_ID>")
+    for wid, did, cid in neighbours:
+        print(f"{wid}, {did}, {cid}")
+        
+    # print(f'done after {time.time() - start}')   
+
 if __name__ == "__main__":
     main()
-"""
