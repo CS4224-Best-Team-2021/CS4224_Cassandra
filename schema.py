@@ -54,7 +54,7 @@ class CustomerOrder(Model):
     O_D_ID = columns.Integer(partition_key=True)
     O_ID = columns.Integer(primary_key=True)
     O_C_ID = columns.Integer()
-    O_CARRIER_ID = columns.Integer(required=False)
+    O_CARRIER_ID = columns.Integer(default=-1)
     O_OL_CNT = columns.Decimal()
     O_ALL_LOCAL = columns.Decimal()
     O_ENTRY_D = columns.DateTime()
