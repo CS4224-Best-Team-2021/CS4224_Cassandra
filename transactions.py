@@ -120,7 +120,7 @@ def stock_level_transaction(w_id, d_id, threshold, num_last_orders):
 
 def popular_item_transaction(w_id, d_id, num_last_orders):
     N = District.filter(D_W_ID=w_id, D_ID=d_id).consistency(READ_CONSISTENCY_LEVEL).get().D_NEXT_O_ID
-    orders = CustomerOrder.filter(O_W_ID=w_id, O_D_ID=d_id, O_ID__gte(N-num_last_orders)).consistency(READ_CONSISTENCY_LEVEL)
+    orders = CustomerOrder.filter(O_W_ID=w_id, O_D_ID=d_id, O_ID__gte=(N-num_last_orders)).consistency(READ_CONSISTENCY_LEVEL)
     S = orders.values_list('O_ID', flat=True)
     items = {}
     popular_items = {}
@@ -243,8 +243,8 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
     print("Related customers <C_W_ID>, <C_D_ID>, <C_ID>")
     for wid, did, cid in neighbours:
         print(f"{wid}, {did}, {cid}")
-        
-        
+
+
 # Attempt 3: Faster than Attempt 2
 def related_customer_transaction(c_w_id, c_d_id, c_id):
     # start = time.time()
@@ -269,7 +269,7 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
                 READ_CONSISTENCY_LEVEL)
             for other_order_line in other_order_lines:
                 other_item_set.add(other_order_line.OL_I_ID)
-                
+
             for c_item_set in c_item_set_list:
                 if len(c_item_set.intersection(other_item_set)) >= 2:
                     neighbours.add((customer_order.O_W_ID, customer_order.O_D_ID, customer_order.O_C_ID))
@@ -281,8 +281,8 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
     print("Related customers <C_W_ID>, <C_D_ID>, <C_ID>")
     for wid, did, cid in neighbours:
         print(f"{wid}, {did}, {cid}")
-        
-    # print(f'done after {time.time() - start}')   
+
+    # print(f'done after {time.time() - start}')
 
 if __name__ == "__main__":
     main()
