@@ -66,6 +66,8 @@ def new_order_transaction(w_id, d_id, c_id, num_items, item_number, supplier_war
     for iid in item_number:
         related_orders = OrderLine.filter(OL_I_ID=iid).consistency(READ_CONSISTENCY_LEVEL)
         for order in related_orders:
+            if order.OL_W_ID == w_id:
+                continue
             if (order.OL_W_ID, order.OL_D_ID, order.OL_O_ID) not in scores:
                 scores[(order.OL_W_ID, order.OL_D_ID, order.OL_O_ID)] = 0
             scores[(order.OL_W_ID, order.OL_D_ID, order.OL_O_ID)] += 1
