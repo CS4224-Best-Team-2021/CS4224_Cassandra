@@ -212,7 +212,7 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
 def related_customer_transaction(c_w_id, c_d_id, c_id):
     start_time = time.time()
     c_orders = CustomerOrder.objects().allow_filtering().filter(O_W_ID=c_w_id, O_D_ID=c_d_id, O_C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL)
-    o_ids = c_orders.limit()values_list('O_ID', flat=True)
+    o_ids = c_orders.limit().values_list('O_ID', flat=True)
     item_sets = {}
     for oid in o_ids:
         order_line = OrderLine.filter(OL_W_ID=c_w_id, OL_D_ID=c_d_id, OL_O_ID=oid).consistency(READ_CONSISTENCY_LEVEL)
