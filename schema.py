@@ -69,7 +69,7 @@ class Item(Model):
 class OrderLine(Model):
     OL_W_ID = columns.Integer(partition_key=True)
     OL_D_ID = columns.Integer(partition_key=True)
-    OL_O_ID = columns.Integer(partition_key=True)
+    OL_O_ID = columns.Integer(primary_key=True)
     OL_NUMBER = columns.Integer(primary_key=True)
     OL_I_ID = columns.Integer()
     OL_DELIVERY_D = columns.DateTime(required=False)
@@ -97,4 +97,20 @@ class Stock(Model):
     S_DIST_10 = columns.Text(max_length=24)
     S_DATA = columns.Text(max_length=50)
 
-TABLES = [Warehouse, District, Customer, CustomerOrder, Item, OrderLine, Stock]
+class RelatedCustomer(Model):
+    R_W_ID_1 = columns.Integer(partition_key=True)
+    R_D_ID_1 = columns.Integer(partition_key=True)
+    R_C_ID_1 = columns.Integer(primary_key=True)
+    R_O_ID_1 = columns.Integer(primary_key=True)
+    R_I_ID_MIN_1 = columns.Integer()
+    R_I_ID_MAX_1 = columns.Integer()
+    R_I_ITEM_SET_1 = columns.Set(columns.Integer)
+    R_W_ID_2 = columns.Integer(primary_key=True)
+    R_D_ID_2 = columns.Integer(primary_key=True)
+    R_C_ID_2 = columns.Integer(primary_key=True)
+    R_O_ID_2 = columns.Integer(primary_key=True)
+    R_I_ID_MIN_2 = columns.Integer()
+    R_I_ID_MAX_2 = columns.Integer()
+    R_I_ITEM_SET_2 = columns.Set(columns.Integer)
+
+TABLES = [Warehouse, District, Customer, CustomerOrder, Item, OrderLine, Stock, RelatedCustomer]

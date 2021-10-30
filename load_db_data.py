@@ -9,21 +9,21 @@ from cassandra.cqlengine import columns
 
 
 PATH_TO_DATA_FOLDER = 'project_files_4/data_files/'
-DATA_FILES =  ['warehouse.csv', 'district.csv', 'customer.csv', 'order.csv', 'item.csv', 'order-line.csv', 'stock.csv']
+DATA_FILES =  ['warehouse.csv', 'district.csv', 'customer.csv', 'order.csv', 'item.csv', 'order-line.csv', 'stock.csv', 'related_pairs.csv']
 
 def main():
     connection.setup(IP_ADDRESSES, KEYSPACES[0])
-    
+
     for i in range(len(DATA_FILES)):
         print(f'Loading data from {DATA_FILES[i]}...')
         load_data_to_table(i)
-    
+
     print('Completed data loading!')
-        
-        
+
+
 def parse_date_time(time_string):
     return datetime.strptime(time_string, '%Y-%m-%d %H:%M:%S.%f')
-                
+
 # count is used for mock data, uncomment the lines if you only need mock data
 def load_data_to_table(index):
     with open(PATH_TO_DATA_FOLDER + DATA_FILES[index]) as data_file:
@@ -31,7 +31,7 @@ def load_data_to_table(index):
         current_table = TABLES[index]
         keys = current_table().keys()
         count = 0
-        
+
         for row in file_reader:
             if count >= 15:
                 break
@@ -46,8 +46,8 @@ def load_data_to_table(index):
                         value = parse_date_time(row[i])
                     else:
                         value = row[i]
-                    records_dict[key] = value 
+                    records_dict[key] = value
             current_table.create(**records_dict)
-        
+
 if __name__ == "__main__":
     main()

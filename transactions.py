@@ -61,6 +61,28 @@ def new_order_transaction(w_id, d_id, c_id, num_items, item_number, supplier_war
         print(f"Stock quantity: {ADJUSTED_QTY}")
     print(f"Number of Items: {num_items}. Total amount: {TOTAL_AMOUNT}")
 
+    # Update RelatedCustomer
+    scores = {}
+    for iid in item_number:
+        related_orders = OrderLine.filter(OL_I_ID=iid).consistency(READ_CONSISTENCY_LEVEL)
+        for order in related_orders:
+            if (order.OL_W_ID, order.OL_D_ID, order.OL_O_ID) not in scores:
+                scores[(order.OL_W_ID, order.OL_D_ID, order.OL_O_ID)] = 0
+            scores[(order.OL_W_ID, order.OL_D_ID, order.OL_O_ID)] += 1
+
+    for wid, did, oid in scores:
+        if scores[(wid, did, oid)] >= 2:
+            customer = CustomerOrder.filter(O_W_ID=wid, O_D_ID=did, O_ID=oid).consistency(READ_CONSISTENCY_LEVEL).get()
+            items = OrderLine.filter(OL_W_ID=wid, OL_D_ID=did, OL_O_ID=oid).consistency(READ_CONSISTENCY_LEVEL).values_list('I_ID', flat=True)
+            RelatedCustomer.create(R_W_ID_1=w_id, R_D_ID_1=d_id, R_C_ID_1=c_id, R_O_ID_1=N,
+                                  R_I_ID_MIN_1=min(item_number), R_I_ID_MAX_1=max(item_number), R_ITEM_SET_1=set(item_number),
+                                  R_W_ID_2=wid, R_D_ID_2=did, R_C_ID_2=customer.C_ID, R_O_ID_2=oid,
+                                  R_I_ID_MIN_2=min(items), R_I_ID_MAX_2=max(items), R_ITEM_SET_2=set(items))
+            RelatedCustomer.create(R_W_ID_1=wid, R_D_ID_1=did, R_C_ID_1=customer.C_ID, R_O_ID_1=oid,
+                                              R_I_ID_MIN_1=min(items), R_I_ID_MAX_1=max(items), R_ITEM_SET_1=set(items),
+                                              R_W_ID_2=w_id, R_D_ID_2=d_id, R_C_ID_2=c_id, R_O_ID_2=N,
+                                              R_I_ID_MIN_2=min(item_number), R_I_ID_MAX_2=max(item_number), R_ITEM_SET_2=set(item_number))
+
 def payment_transaction(c_w_id, c_d_id, c_id, payment):
     # pass
     print("Payment transaction")
@@ -95,6 +117,7 @@ def delivery_transaction(w_id, carrier_id):
         C.update(C_BALANCE=C.C_BALANCE+B, C_DELIVERY_CNT=C.C_DELIVERY_CNT+1)
 
 
+# Read-heavy transactions
 def order_status_transaction(c_w_id, c_d_id, c_id):
     # pass
     print("Order status transaction")
@@ -106,8 +129,6 @@ def order_status_transaction(c_w_id, c_d_id, c_id):
     for ol in ols:
         print(f"OrderLine: {ol.OL_I_ID}, {ol.OL_SUPPLY_W_ID}, {ol.OL_QUANTITY}, {ol.OL_AMOUNT}, {ol.OL_DELIVERY_D}")
 
-
-# Read-heavy transactions
 def stock_level_transaction(w_id, d_id, threshold, num_last_orders):
     num_below_threshold = 0
     N = District.filter(D_W_ID=w_id, D_ID=d_id).consistency(READ_CONSISTENCY_LEVEL).get().D_NEXT_O_ID
@@ -212,7 +233,7 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
 def related_customer_transaction(c_w_id, c_d_id, c_id):
     start_time = time.time()
     c_orders = CustomerOrder.objects().allow_filtering().filter(O_W_ID=c_w_id, O_D_ID=c_d_id, O_C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL)
-    o_ids = c_orders.limit()values_list('O_ID', flat=True)
+    o_ids = c_orders.values_list('O_ID', flat=True)
     item_sets = {}
     for oid in o_ids:
         order_line = OrderLine.filter(OL_W_ID=c_w_id, OL_D_ID=c_d_id, OL_O_ID=oid).consistency(READ_CONSISTENCY_LEVEL)
@@ -243,8 +264,8 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
     print("Related customers <C_W_ID>, <C_D_ID>, <C_ID>")
     for wid, did, cid in neighbours:
         print(f"{wid}, {did}, {cid}")
-        
-        
+
+
 # Attempt 3: Faster than Attempt 2
 def related_customer_transaction(c_w_id, c_d_id, c_id):
     # start = time.time()
@@ -269,7 +290,7 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
                 READ_CONSISTENCY_LEVEL)
             for other_order_line in other_order_lines:
                 other_item_set.add(other_order_line.OL_I_ID)
-                
+
             for c_item_set in c_item_set_list:
                 if len(c_item_set.intersection(other_item_set)) >= 2:
                     neighbours.add((customer_order.O_W_ID, customer_order.O_D_ID, customer_order.O_C_ID))
@@ -281,8 +302,21 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
     print("Related customers <C_W_ID>, <C_D_ID>, <C_ID>")
     for wid, did, cid in neighbours:
         print(f"{wid}, {did}, {cid}")
-        
-    # print(f'done after {time.time() - start}')   
+
+    # print(f'done after {time.time() - start}')
+
+# Attempt 4: Efficient reads from existing manipulated data, but pushes the extra processing steps to New-Order Transaction
+def related_customer_transaction(c_w_id, c_d_id, c_id):
+    related_customers = RelatedCustomer.filter(R_W_ID_1=c_w_id, R_D_ID_1=c_d_id, R_C_ID_1=c_id).consistency(READ_CONSISTENCY_LEVEL).values_list('R_W_ID_2', 'R_D_ID_2', 'R_C_ID_2')
+    print("Customer <C_W_ID>, <C_D_ID>, <C_ID>")
+        print(f"{c_w_id}, {c_d_id}, {c_id}")
+        print("Related customers <C_W_ID>, <C_D_ID>, <C_ID>")
+    existing = set()
+    for wid, did, cid in related_customers:
+        if (wid, did, cid) in existing:
+            continue
+        existing.add((wid, did, cid)
+        print(f"{wid}, {did}, {cid}")
 
 if __name__ == "__main__":
     main()
