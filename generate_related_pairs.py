@@ -35,6 +35,7 @@ def main():
     double_pairs = all_pairs.append(all_pairs.rename(columns={'W_ID_x':'W_ID_y', 'D_ID_x':'D_ID_y', 'C_ID_x':'C_ID_y', 'O_ID_x':'O_ID_y', 'W_ID_y':'W_ID_x', 'D_ID_y':'D_ID_x', 'C_ID_y':'C_ID_x', 'O_ID_y':'O_ID_x'}), ignore_index=True)
     related_dataset = double_pairs.merge(grouped, left_on=['W_ID_x', 'D_ID_x', 'C_ID_x', 'O_ID_x'], right_on=['W_ID', 'D_ID', 'C_ID', 'O_ID']).filter(items=['W_ID_x', 'D_ID_x', 'C_ID_x', 'O_ID_x', 'I_ID_MIN', 'I_ID_MAX', 'ITEM_SET', 'W_ID_y', 'D_ID_y', 'C_ID_y', 'O_ID_y'])
     related_dataset = related_dataset.merge(grouped, left_on=['W_ID_y', 'D_ID_y', 'C_ID_y', 'O_ID_y'], right_on=['W_ID', 'D_ID', 'C_ID', 'O_ID']).filter(items=['W_ID_x', 'D_ID_x', 'C_ID_x', 'O_ID_x', 'I_ID_MIN_x', 'I_ID_MAX_x', 'ITEM_SET_x', 'W_ID_y', 'D_ID_y', 'C_ID_y', 'O_ID_y', 'I_ID_MIN_y', 'I_ID_MAX_y', 'ITEM_SET_y'])
+    related_dataset = related_dataset[['W_ID_x', 'D_ID_x', 'C_ID_x', 'O_ID_x', 'W_ID_y', 'D_ID_y', 'C_ID_y', 'O_ID_y', 'I_ID_MIN_x', 'I_ID_MAX_x', 'ITEM_SET_x', 'I_ID_MIN_y', 'I_ID_MAX_y', 'ITEM_SET_y']]
     related_dataset.to_csv('project_files_4/data_files/related_pairs.csv', header=False, index=False
 
 if __name__ == "__main__":

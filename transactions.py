@@ -311,13 +311,13 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
 def related_customer_transaction(c_w_id, c_d_id, c_id):
     related_customers = RelatedCustomer.filter(R_W_ID_1=c_w_id, R_D_ID_1=c_d_id, R_C_ID_1=c_id).consistency(READ_CONSISTENCY_LEVEL).values_list('R_W_ID_2', 'R_D_ID_2', 'R_C_ID_2')
     print("Customer <C_W_ID>, <C_D_ID>, <C_ID>")
-        print(f"{c_w_id}, {c_d_id}, {c_id}")
-        print("Related customers <C_W_ID>, <C_D_ID>, <C_ID>")
+    print(f"{c_w_id}, {c_d_id}, {c_id}")
+    print("Related customers <C_W_ID>, <C_D_ID>, <C_ID>")
     existing = set()
     for wid, did, cid in related_customers:
         if (wid, did, cid) in existing:
             continue
-        existing.add((wid, did, cid)
+        existing.add((wid, did, cid))
         print(f"{wid}, {did}, {cid}")
 
 if __name__ == "__main__":
