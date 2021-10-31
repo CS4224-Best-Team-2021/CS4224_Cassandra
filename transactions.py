@@ -284,5 +284,41 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
 
     # print(f'done after {time.time() - start}')
 
+# Attempt 5: No extra tables, only secondary index on OL_I_ID and O_C_ID
+# NOTE: Run usr/bin/cqlsh --file create_index.cql first, or else this transaction will fail and require ALLOW FILTERING
+def related_customer_transaction(c_w_id, c_d_id, c_id):
+    c_orders = CustomerOrder.filter(O_W_ID=c_w_id, O_D_ID=c_d_id, O_C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL)
+    c_item_set_list = []
+    for c_order in c_orders:
+        c_item_set = set()
+        c_order_lines = OrderLine.filter(OL_W_ID=c_w_id, OL_D_ID=c_d_id, OL_O_ID=c_order.O_ID).consistency(READ_CONSISTENCY_LEVEL)
+        for c_order_line in c_order_lines:
+            c_item_set.add(c_order_line.OL_I_ID)
+        c_item_set_list.append(c_item_set)
+
+    neighbours = set()
+    for item_set in c_item_set_list:
+        scores = {}
+        for item in item_set:
+            related_orders = list(OrderLine.filter(OL_I_ID=item).consistency(READ_CONSISTENCY_LEVEL).values_list('OL_W_ID', 'OL_D_ID', 'OL_O_ID').allow_filtering())
+            for wid, did, oid in related_orders:
+                if wid == c_w_id:
+                    continue
+                if (wid, did, oid) not in scores:
+                    scores[(wid, did, oid)] = 0
+                scores[(wid, did, oid)] += 1
+        for identifier, score in scores.items():
+            if score >= 2:
+                wid, did, oid = identifier
+                customer = CustomerOrder.filter(O_W_ID=wid, O_D_ID=did, O_ID=oid).consistency(READ_CONSISTENCY_LEVEL).get()
+                neighbours.add((customer.O_W_ID, customer.O_D_ID, customer.O_C_ID))
+
+    # Print output
+    print("Customer <W_ID>, <D_ID>, <C_ID>")
+    print(f"{c_w_id}, {c_d_id}, {c_id}")
+    print("Related customers <W_ID>, <D_ID>, <C_ID>")
+    for wid, did, oid in neighbours:
+        print(f"{wid}, {did}, {oid}")
+
 if __name__ == "__main__":
     main()
