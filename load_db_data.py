@@ -24,6 +24,9 @@ def main():
 def parse_date_time(time_string):
     return datetime.strptime(time_string, '%Y-%m-%d %H:%M:%S.%f')
 
+def parse_set(set_string):
+    return set(set_string[1:-2].split(", "))
+
 # count is used for mock data, uncomment the lines if you only need mock data
 def load_data_to_table(index):
     with open(PATH_TO_DATA_FOLDER + DATA_FILES[index]) as data_file:
@@ -44,6 +47,8 @@ def load_data_to_table(index):
                     key = keys[i]
                     if isinstance(current_table._columns[keys[i]], columns.DateTime):
                         value = parse_date_time(row[i])
+                    elif isinstance(current_table._columns[keys[i]], columns.Set):
+                        value = parse_set(row[i])
                     else:
                         value = row[i]
                     records_dict[key] = value
