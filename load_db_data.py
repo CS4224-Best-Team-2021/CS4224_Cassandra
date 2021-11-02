@@ -9,7 +9,7 @@ from cassandra.cqlengine import columns
 
 
 PATH_TO_DATA_FOLDER = 'project_files_4/data_files/'
-DATA_FILES =  ['warehouse.csv', 'district.csv', 'customer.csv', 'order.csv', 'item.csv', 'order-line.csv', 'stock.csv']
+DATA_FILES =  ['warehouse.csv', 'district.csv', 'customer.csv', 'order.csv', 'order.csv', 'item.csv', 'order-line.csv', 'stock.csv']
 
 def main():
     connection.setup(IP_ADDRESSES, KEYSPACES[0])

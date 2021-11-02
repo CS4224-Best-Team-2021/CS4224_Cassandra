@@ -59,6 +59,16 @@ class CustomerOrder(Model):
     O_ALL_LOCAL = columns.Decimal()
     O_ENTRY_D = columns.DateTime()
 
+class CustomerOrderByCID(Model):
+    O_W_ID = columns.Integer(partition_key=True)
+    O_D_ID = columns.Integer(partition_key=True)
+    O_ID = columns.Integer(primary_key=True)
+    O_C_ID = columns.Integer()
+    O_CARRIER_ID = columns.Integer(default=-1)
+    O_OL_CNT = columns.Decimal()
+    O_ALL_LOCAL = columns.Decimal()
+    O_ENTRY_D = columns.DateTime()
+
 class Item(Model):
     I_ID = columns.Integer(primary_key=True)
     I_NAME = columns.Text(max_length=24)
@@ -97,4 +107,4 @@ class Stock(Model):
     S_DIST_10 = columns.Text(max_length=24)
     S_DATA = columns.Text(max_length=50)
 
-TABLES = [Warehouse, District, Customer, CustomerOrder, Item, OrderLine, Stock]
+TABLES = [Warehouse, District, Customer, CustomerOrder, CustomerOrderByCID, Item, OrderLine, Stock]
