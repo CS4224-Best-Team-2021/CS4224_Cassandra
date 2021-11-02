@@ -40,7 +40,7 @@ def new_order_transaction(w_id, d_id, c_id, num_items, item_number, supplier_war
     order = CustomerOrder.create(O_ID=N, O_D_ID=d_id, O_W_ID=w_id, O_C_ID=c_id, O_ENTRY_D=datetime.now(), O_OL_CNT=num_items, O_ALL_LOCAL=status)
     print(f"Order number: {N}. Entry date: {order.O_ENTRY_D}")
     TOTAL_AMOUNT = 0
-    for i in range(1, num_items):
+    for i in range(1, num_items+1):
         S = Stock.filter(S_W_ID=supplier_warehouse[i], S_I_ID=item_number[i]).consistency(READ_CONSISTENCY_LEVEL).get()
         I = Item.filter(I_ID=item_number[i]).consistency(READ_CONSISTENCY_LEVEL).get()
         S.QUANTITY = S.S_QUANTITY
