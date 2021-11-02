@@ -22,7 +22,7 @@ WRITE_CONSISTENCY_LEVEL = ConsistencyLevel.ALL
 
 # Note: We will need to pass in parameters to most of these functions
 # Write-heavy transactions
-def new_order_transaction(w_id, d_id, c_id, num_items, item_number, supplier_warehouse, quantity):
+def new_order_transaction(c_id, w_id, d_id, num_items, item_number, supplier_warehouse, quantity):
     # pass
     print("New order transaction")
     D = District.filter(D_W_ID=w_id, D_ID=d_id).consistency(READ_CONSISTENCY_LEVEL).get()
@@ -33,14 +33,14 @@ def new_order_transaction(w_id, d_id, c_id, num_items, item_number, supplier_war
     N = D.D_NEXT_O_ID
     D.update(D_NEXT_O_ID=N+1)
     status = 0
-    for i in range(1, num_items+1):
+    for i in range(0, num_items):
         if supplier_warehouse[i] == w_id:
             status = 1
             break
     order = CustomerOrder.create(O_ID=N, O_D_ID=d_id, O_W_ID=w_id, O_C_ID=c_id, O_ENTRY_D=datetime.now(), O_OL_CNT=num_items, O_ALL_LOCAL=status)
     print(f"Order number: {N}. Entry date: {order.O_ENTRY_D}")
     TOTAL_AMOUNT = 0
-    for i in range(1, num_items+1):
+    for i in range(0, num_items):
         S = Stock.filter(S_W_ID=supplier_warehouse[i], S_I_ID=item_number[i]).consistency(READ_CONSISTENCY_LEVEL).get()
         I = Item.filter(I_ID=item_number[i]).consistency(READ_CONSISTENCY_LEVEL).get()
         S.QUANTITY = S.S_QUANTITY
@@ -50,15 +50,16 @@ def new_order_transaction(w_id, d_id, c_id, num_items, item_number, supplier_war
         s_remote_cnt = (S.S_REMOTE_CNT + 1) if supplier_warehouse[i] != w_id else (S.S_REMOTE_CNT)
         S.update(S_QUANTITY=ADJUSTED_QTY, S_YTD=S.S_YTD+quantity[i], S_ORDER_CNT=S.S_ORDER_CNT+1, S_REMOTE_CNT=s_remote_cnt)
         ITEM_AMOUNT = quantity[i] * I.I_PRICE
-        TOTAL_AMOUNT = TOTAL_AMOUNT + ITEM_AMOUNT
-        OrderLine.create(OL_O_ID=N, OL_D_ID=d_id, OL_W_ID=w_id, OL_NUMBER=i, OL_I_ID=item_number[i], OL_SUPPLY_W_ID=supplier_warehouse[i], OL_QUANTITY=quantity[i], OL_AMOUNT=ITEM_AMOUNT,  OL_DIST_INFO="helo")
-        TOTAL_AMOUNT = TOTAL_AMOUNT * (1 + W.W_TAX + D.D_TAX) * (1 - C.C_DISCOUNT)
+        TOTAL_AMOUNT += ITEM_AMOUNT
+        s_dis = "S_DIST_10" if d_id == 10 else "S_DIST_0" + str(d_id)
+        OrderLine.create(OL_O_ID=N, OL_D_ID=d_id, OL_W_ID=w_id, OL_NUMBER=i+1, OL_I_ID=item_number[i], OL_SUPPLY_W_ID=supplier_warehouse[i], OL_QUANTITY=quantity[i], OL_AMOUNT=ITEM_AMOUNT,  OL_DIST_INFO=S[s_dis])
         print(f"Item number: {item_number[i]}")
         print(f"Item name: {I.I_NAME}")
         print(f"Supplier warehouse: {supplier_warehouse[i]}")
         print(f"Quantity: {quantity[i]}")
         print(f"Order-line amount: {ITEM_AMOUNT}")
         print(f"Stock quantity: {ADJUSTED_QTY}")
+    TOTAL_AMOUNT = TOTAL_AMOUNT * (1 + W.W_TAX + D.D_TAX) * (1 - C.C_DISCOUNT)
     print(f"Number of Items: {num_items}. Total amount: {TOTAL_AMOUNT}")
 
 def payment_transaction(c_w_id, c_d_id, c_id, payment):
@@ -80,7 +81,7 @@ def payment_transaction(c_w_id, c_d_id, c_id, payment):
 def delivery_transaction(w_id, carrier_id):
     # pass
     print("Delivery transaction")
-    for i in range(1, 3):
+    for i in range(1, 11):
         D = District.filter(D_W_ID=w_id, D_ID=i).consistency(READ_CONSISTENCY_LEVEL).get()
         X = CustomerOrder.filter(O_W_ID=w_id, O_D_ID=i, O_CARRIER_ID=-1).consistency(READ_CONSISTENCY_LEVEL).allow_filtering().order_by('O_ID').first()
         N = X.O_ID
