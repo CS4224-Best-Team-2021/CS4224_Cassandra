@@ -74,7 +74,7 @@ def payment_transaction(c_w_id, c_d_id, c_id, payment):
     C.update(C_BALANCE=C.C_BALANCE-payment_d, C_YTD_PAYMENT=C.C_YTD_PAYMENT+payment, C_PAYMENT_CNT=C.C_PAYMENT_CNT+1)
     print(f"Customer({c_w_id}, {c_d_id}, {c_id}): name({C.C_FIRST} {C.C_MIDDLE} {C.C_LAST}), address ({C.C_STREET_1}, {C.C_STREET_2}, {C.C_CITY}, {C.C_STATE}, {C.C_ZIP}), {C.C_PHONE}, {C.C_SINCE}, {C.C_CREDIT}, {C.C_CREDIT_LIM}, {C.C_DISCOUNT}, {C.C_BALANCE}")
     print(f"Warehouse: {W.W_STREET_1}, {W.W_STREET_2}, {W.W_CITY}, {W.W_STATE}, {W.W_ZIP}")
-    print(f"Distict: {D.D_STREET_1}, {D.D_STREET_2}, {D.D_CITY}, {D.D_STATE}, {D.D_ZIP}")
+    print(f"District: {D.D_STREET_1}, {D.D_STREET_2}, {D.D_CITY}, {D.D_STATE}, {D.D_ZIP}")
     print(f"Payment: {payment}")
 
 def delivery_transaction(w_id, carrier_id):
