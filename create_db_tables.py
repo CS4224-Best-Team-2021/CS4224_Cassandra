@@ -6,7 +6,7 @@ KEYSPACES = ['cs4224_keyspace']
 # Connect to localhost 
 IP_ADDRESSES = ['127.0.0.1']
 # Connect to seed nodes xcnc20 and xcnc21
-# IP_ADDRESSES = ['192.168.48.169', '192.168.48.170']
+# IP_ADDRESSES = ['192.168.48.169:6042', '192.168.48.170:6042']
 
 def main():
     # create cluster
