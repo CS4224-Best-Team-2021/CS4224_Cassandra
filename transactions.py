@@ -17,6 +17,8 @@ def main():
     top_balance_transaction()
     related_customer_transaction(1, 1, 1)
 
+# READ_CONSISTENCY_LEVEL = ConsistencyLevel.LOCAL_QUORUM
+# WRITE_CONSISTENCY_LEVEL = ConsistencyLevel.LOCAL_QUORUM
 READ_CONSISTENCY_LEVEL = ConsistencyLevel.ONE
 WRITE_CONSISTENCY_LEVEL = ConsistencyLevel.ALL
 
