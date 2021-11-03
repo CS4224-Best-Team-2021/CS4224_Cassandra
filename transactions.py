@@ -105,6 +105,7 @@ def order_status_transaction(c_w_id, c_d_id, c_id):
         print(f"OrderLine: {ol.OL_I_ID}, {ol.OL_SUPPLY_W_ID}, {ol.OL_QUANTITY}, {ol.OL_AMOUNT}, {ol.OL_DELIVERY_D}")
 
 def stock_level_transaction(w_id, d_id, threshold, num_last_orders):
+    # Processing steps
     num_below_threshold = 0
     N = District.filter(D_W_ID=w_id, D_ID=d_id).consistency(READ_CONSISTENCY_LEVEL).get().D_NEXT_O_ID
     order_lines = OrderLine.filter(OL_W_ID=w_id, OL_D_ID=d_id, OL_O_ID__gte=(N-num_last_orders)).consistency(READ_CONSISTENCY_LEVEL)
@@ -113,9 +114,11 @@ def stock_level_transaction(w_id, d_id, threshold, num_last_orders):
         quantity = Stock.filter(S_W_ID=w_id, S_I_ID=iid).consistency(READ_CONSISTENCY_LEVEL).get().S_QUANTITY
         if quantity < threshold:
             num_below_threshold += 1
+    # Print output
     print(f"Total number of items with stock quantity at W_ID {w_id} below the threshold: {num_below_threshold}")
 
 def popular_item_transaction(w_id, d_id, num_last_orders):
+    # Processing steps
     N = District.filter(D_W_ID=w_id, D_ID=d_id).consistency(READ_CONSISTENCY_LEVEL).get().D_NEXT_O_ID
     orders = CustomerOrder.filter(O_W_ID=w_id, O_D_ID=d_id, O_ID__gte=(N-num_last_orders)).consistency(READ_CONSISTENCY_LEVEL)
     S = orders.values_list('O_ID', flat=True)
@@ -133,6 +136,7 @@ def popular_item_transaction(w_id, d_id, num_last_orders):
                 popular_items[x] = []
                 max_quantity = curr_quantity
             popular_items[x].append(i)
+    # Print output
     print(f"District identifier (W_ID, D_ID): {w_id}, {d_id}")
     print(f"Number of last orders to be examined L = {num_last_orders}")
     distinct_items = {}
@@ -172,119 +176,10 @@ def top_balance_transaction():
         print('Warehouse name of customer', warehouse.W_NAME)
         print('District name of customer:', district.D_NAME)
 
-# Attempt 1 - encountered issues with allow_filtering and IN filter
-# maybe consider building a secondary index on OL_I_ID?
-def related_customer_transaction(c_w_id, c_d_id, c_id):
-    c_orders = CustomerOrder.allow_filtering().filter(O_W_ID=c_w_id, O_D_ID=c_d_id, O_C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL)
-    o_ids = list(c_orders.values_list('O_ID', flat=True))
-    item_sets = {}
-    for oid in o_ids:
-        order_line = OrderLine.filter(OL_W_ID=c_w_id, OL_D_ID=c_d_id, OL_O_ID=oid).consistency(READ_CONSISTENCY_LEVEL)
-        item_sets[oid] = set(order_line.values_list('OL_I_ID', flat=True))
-
-    w_other = set(Warehouse.values_list('W_ID', flat=True))
-    w_other.remove(c_w_id)
-    c_other = list(Customer.filter(C_W_ID__in=list(w_other)).consistency(READ_CONSISTENCY_LEVEL).values_list(['C_W_ID', 'C_D_ID', 'C_ID']))
-    neighbours = set()
-    for wid_other, did_other, cid_other in c_other:
-        o_other = CustomerOrder.allow_filtering().filter(O_W_ID=wid_other, O_D_ID=did_other, O_C_ID=cid_other).consistency(READ_CONSISTENCY_LEVEL)
-        oid_other = list(o_other.values_list('O_ID', flat=True))
-        for oid in oid_other:
-            ol_other = OrderLine.filter(OL_W_ID=c_w_id, OL_D_ID=c_d_id, OL_O_ID=oid).consistency(READ_CONSISTENCY_LEVEL)
-            items_other = set(ol_other.values_list('OL_I_ID', flat=True))
-            for item_set in item_sets.values():
-                if len(items_other.intersection(item_set)) >= 2:
-                    neighbours.add((wid_other, did_other, cid_other))
-                    break
-            else:
-                break
-
-    print("Customer <C_W_ID>, <C_D_ID>, <C_ID>")
-    print(f"{c_w_id}, {c_d_id}, {c_id}")
-    print("Related customers <C_W_ID>, <C_D_ID>, <C_ID>")
-    for wid, did, cid in neighbours:
-        print(f"{wid}, {did}, {cid}")
-
-# Attempt 2 - Runs successfully but takes too long (iterating through effectively 90% of the entries in Order-Line)
-def related_customer_transaction(c_w_id, c_d_id, c_id):
-    start_time = time.time()
-    c_orders = CustomerOrder.objects().allow_filtering().filter(O_W_ID=c_w_id, O_D_ID=c_d_id, O_C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL)
-    o_ids = c_orders.limit().values_list('O_ID', flat=True)
-    item_sets = {}
-    for oid in o_ids:
-        order_line = OrderLine.filter(OL_W_ID=c_w_id, OL_D_ID=c_d_id, OL_O_ID=oid).consistency(READ_CONSISTENCY_LEVEL)
-        item_sets[oid] = set(order_line.values_list('OL_I_ID', flat=True))
-    # print(f"Obtained item-sets. Time elapsed: {time.time()-start_time} seconds")
-    c_other = list(filter(lambda x: x[0] != c_w_id, list(Customer.all().limit(300000).values_list('C_W_ID', 'C_D_ID', 'C_ID'))))
-    # print(f"Obtained list of customers (size {len(c_other)}). Time elapsed: {time.time()-start_time} seconds")
-    neighbours = set()
-    # count = 0
-    for wid_other, did_other, cid_other in c_other:
-        # if count % 100 == 99:
-        #     print(f"{count} iterations completed. Time elapsed: {time.time()-start_time} seconds")
-        o_other = CustomerOrder.objects().allow_filtering().filter(O_W_ID=wid_other, O_D_ID=did_other, O_C_ID=cid_other).consistency(READ_CONSISTENCY_LEVEL)
-        oid_other = list(o_other.values_list('O_ID', flat=True))
-        for oid in oid_other:
-            ol_other = OrderLine.filter(OL_W_ID=c_w_id, OL_D_ID=c_d_id, OL_O_ID=oid).consistency(READ_CONSISTENCY_LEVEL)
-            items_other = set(ol_other.values_list('OL_I_ID', flat=True))
-            for item_set in item_sets.values():
-                if len(items_other.intersection(item_set)) >= 2:
-                    neighbours.add((wid_other, did_other, cid_other))
-                    break
-            else:
-                break
-        # count += 1
-
-    print("Customer <C_W_ID>, <C_D_ID>, <C_ID>")
-    print(f"{c_w_id}, {c_d_id}, {c_id}")
-    print("Related customers <C_W_ID>, <C_D_ID>, <C_ID>")
-    for wid, did, cid in neighbours:
-        print(f"{wid}, {did}, {cid}")
-
-
-# Attempt 3: Faster than Attempt 2
-def related_customer_transaction(c_w_id, c_d_id, c_id):
-    # start = time.time()
-    # print(f'executing related_customer_transaction 3')
-    # Processing steps
-    c_item_set_list = []
-    c_orders = CustomerOrder.objects().allow_filtering().filter(O_W_ID=c_w_id, O_D_ID=c_d_id, O_C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL)
-    for c_order in c_orders:
-        c_item_set = set()
-        c_order_lines = OrderLine.filter(OL_W_ID=c_w_id, OL_D_ID=c_d_id, OL_O_ID=c_order.O_ID).consistency(READ_CONSISTENCY_LEVEL)
-        for c_order_line in c_order_lines:
-            c_item_set.add(c_order_line.OL_I_ID)
-        c_item_set_list.append(c_item_set)
-
-    neighbours = set()
-
-    customer_orders = CustomerOrder.all()
-    for customer_order in customer_orders:
-        if c_w_id != customer_order.O_W_ID:
-            other_item_set = set()
-            other_order_lines = OrderLine.filter(OL_W_ID=customer_order.O_W_ID, OL_D_ID=customer_order.O_D_ID, OL_O_ID=customer_order.O_ID).consistency(
-                READ_CONSISTENCY_LEVEL)
-            for other_order_line in other_order_lines:
-                other_item_set.add(other_order_line.OL_I_ID)
-
-            for c_item_set in c_item_set_list:
-                if len(c_item_set.intersection(other_item_set)) >= 2:
-                    neighbours.add((customer_order.O_W_ID, customer_order.O_D_ID, customer_order.O_C_ID))
-                    break
-
-    # Print output
-    print("Customer <C_W_ID>, <C_D_ID>, <C_ID>")
-    print(f"{c_w_id}, {c_d_id}, {c_id}")
-    print("Related customers <C_W_ID>, <C_D_ID>, <C_ID>")
-    for wid, did, cid in neighbours:
-        print(f"{wid}, {did}, {cid}")
-
-    # print(f'done after {time.time() - start}')
-
-# Attempt 5: No extra tables, only secondary index on OL_I_ID and O_C_ID
 # NOTE: Run usr/bin/cqlsh --file create_index.cql first, or else this transaction will fail and require ALLOW FILTERING
 def related_customer_transaction(c_w_id, c_d_id, c_id):
-    c_orders = CustomerOrder.filter(O_W_ID=c_w_id, O_D_ID=c_d_id, O_C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL)
+    # Processing steps
+    c_orders = CustomerOrderByCID.filter(O_W_ID=c_w_id, O_D_ID=c_d_id, O_C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL)
     c_item_set_list = []
     for c_order in c_orders:
         c_item_set = set()
@@ -307,7 +202,7 @@ def related_customer_transaction(c_w_id, c_d_id, c_id):
         for identifier, score in scores.items():
             if score >= 2:
                 wid, did, oid = identifier
-                customer = CustomerOrder.filter(O_W_ID=wid, O_D_ID=did, O_ID=oid).consistency(READ_CONSISTENCY_LEVEL).get()
+                customer = CustomerOrderByCID.filter(O_W_ID=wid, O_D_ID=did, O_ID=oid).consistency(READ_CONSISTENCY_LEVEL).get()
                 neighbours.add((customer.O_W_ID, customer.O_D_ID, customer.O_C_ID))
 
     # Print output
