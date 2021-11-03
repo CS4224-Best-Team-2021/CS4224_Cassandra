@@ -4,21 +4,20 @@ from transactions import *
 
 import csv
 import time
-
-PATH_A = 'project_files_4/xact_files_A'
-PATH_B = 'project_files_4/xact_files_B'
+import sys
 
 transaction_times = []
 
 def main():
     connection.setup(IP_ADDRESSES, KEYSPACES[0])
-    
+    experiment_number = sys.argv[1]
+    client_number = sys.argv[2]
+        
     # TODO: Handle client numbers and file path more generally
     print('executing transactions...')
-    client_number = 0
-    execute_transaction(PATH_A, 99)
+    execute_transaction(f'project_files_4/xact_files_{experiment_number}/{client_number}.txt')
     
-    # Compute performance statistics     
+    # Compute performance statistics
     print('computing performance statistics...')
     number_of_transactions_executed = len(transaction_times)
     total_transaction_execution_time = sum(transaction_times)
@@ -29,7 +28,7 @@ def main():
     percentile_95_transaction_latency = sorted_transaction_times[int(number_of_transactions_executed * 0.95)]
     percentile_99_transaction_latency = sorted_transaction_times[int(number_of_transactions_executed * 0.99)]
     
-    with open('results/clients.csv', 'a') as f:
+    with open(f'results/{client_number}.csv', 'w') as f:
         file_writer = csv.writer(f)
         file_writer.writerow([client_number,
                               number_of_transactions_executed,
@@ -38,10 +37,9 @@ def main():
                               median_transaction_latency,
                               percentile_95_transaction_latency,
                               percentile_99_transaction_latency])
-    print('performance statistics have been written to results/clients.csv')
+    print('performance statistics have been written to results/{client_number}.csv')
     
-def execute_transaction(transaction_folder_path, file_number):
-    file_path = f'{transaction_folder_path}/{file_number}.txt'
+def execute_transaction(file_path):
     with open(file_path) as file:
         while True:
             line = file.readline()
