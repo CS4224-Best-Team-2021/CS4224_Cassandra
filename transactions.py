@@ -39,7 +39,7 @@ def new_order_transaction(c_id, w_id, d_id, num_items, item_number, supplier_war
             status = 0
             break
     order = CustomerOrder.create(O_ID=N, O_D_ID=d_id, O_W_ID=w_id, O_C_ID=c_id, O_ENTRY_D=datetime.now(), O_OL_CNT=num_items, O_ALL_LOCAL=status)
-    CustomerOrderByCID.create(O_ID=N, O_D_ID=d_id, O_W_ID=w_id, O_C_ID=c_id, O_ENTRY_D=datetime.now(), O_OL_CNT=num_items, O_ALL_LOCAL=status)
+    CustomerOrderByCID.create(O_ID=N, O_D_ID=d_id, O_W_ID=w_id, O_C_ID=c_id, O_ENTRY_D=order.O_ENTRY_D, O_OL_CNT=num_items, O_ALL_LOCAL=status)
     print(f"Order number: {N}. Entry date: {order.O_ENTRY_D}")
     TOTAL_AMOUNT = 0
     item_output_strings = []
