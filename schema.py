@@ -15,7 +15,7 @@ class Warehouse(Model):
 
 class District(Model):
     D_W_ID = columns.Integer(partition_key=True)
-    D_ID = columns.Integer(partition_key=True)
+    D_ID = columns.Integer(primary_key=True)
     D_NAME = columns.Text(max_length=10)
     D_STREET_1 = columns.Text(max_length=20)
     D_STREET_2 = columns.Text(max_length=20)
@@ -29,7 +29,7 @@ class District(Model):
 class Customer(Model):
     C_W_ID = columns.Integer(partition_key=True)
     C_D_ID = columns.Integer(partition_key=True)
-    C_ID = columns.Integer(partition_key=True)
+    C_ID = columns.Integer(primary_key=True)
     C_FIRST = columns.Text(max_length=16)
     C_MIDDLE = columns.Text(max_length=2)
     C_LAST = columns.Text(max_length=20)
@@ -79,7 +79,7 @@ class Item(Model):
 class OrderLine(Model):
     OL_W_ID = columns.Integer(partition_key=True)
     OL_D_ID = columns.Integer(partition_key=True)
-    OL_O_ID = columns.Integer(partition_key=True)
+    OL_O_ID = columns.Integer(primary_key=True)
     OL_NUMBER = columns.Integer(primary_key=True)
     OL_I_ID = columns.Integer()
     OL_DELIVERY_D = columns.DateTime(required=False)
@@ -90,7 +90,7 @@ class OrderLine(Model):
 
 class Stock(Model):
     S_W_ID = columns.Integer(partition_key=True)
-    S_I_ID =  columns.Integer(partition_key=True)
+    S_I_ID =  columns.Integer(primary_key=True)
     S_QUANTITY = columns.Decimal()
     S_YTD = columns.Decimal()
     S_ORDER_CNT = columns.Integer()
