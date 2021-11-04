@@ -10,7 +10,7 @@ IP_ADDRESSES = ['127.0.0.1']
 
 def main():
     # create cluster
-    connection.register_connection('default', IP_ADDRESSES)
+    connection.register_connection('default', IP_ADDRESSES, cluster_options={'control_connection_timeout': 120})
     connections=['default']
     
     # create keyspace

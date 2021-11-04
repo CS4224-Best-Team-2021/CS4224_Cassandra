@@ -7,7 +7,7 @@ run_experiment() {
         echo "Assigning $machine_name to client $i"
         file_name="project_files_4/data_files/xact_files_$experiment_type/$i.txt"
         echo $file_name
-        sshpass -p $password ssh cs4224b@$machine_name.comp.nus.edu.sg "cd ~/temp/CS4224_Cassandra && python3 driver.py $experiment_type $i"
+        nohup sshpass -p $password ssh -q cs4224b@$machine_name.comp.nus.edu.sg "cd ~/temp/CS4224_Cassandra && python3 driver.py $experiment_type $i" &
     done
 }
 
