@@ -34,16 +34,11 @@ def new_order_transaction(c_id, w_id, d_id, num_items, item_number, supplier_war
     N = D.D_NEXT_O_ID
     D.update(D_NEXT_O_ID=N+1)
     status = 1
-    for i in range(num_items):
-        if supplier_warehouse[i] != w_id:
-            status = 0
-            break
-    order = CustomerOrder.create(O_ID=N, O_D_ID=d_id, O_W_ID=w_id, O_C_ID=c_id, O_ENTRY_D=datetime.now(), O_OL_CNT=num_items, O_ALL_LOCAL=status)
-    CustomerOrderByCID.create(O_ID=N, O_D_ID=d_id, O_W_ID=w_id, O_C_ID=c_id, O_ENTRY_D=order.O_ENTRY_D, O_OL_CNT=num_items, O_ALL_LOCAL=status)
-    print(f"Order number: {N}. Entry date: {order.O_ENTRY_D}")
     TOTAL_AMOUNT = 0
     item_output_strings = []
     for i in range(num_items):
+        if supplier_warehouse[i] != w_id:
+            status = 0
         S = Stock.filter(S_W_ID=supplier_warehouse[i], S_I_ID=item_number[i]).consistency(READ_CONSISTENCY_LEVEL).get()
         I = Item.filter(I_ID=item_number[i]).consistency(READ_CONSISTENCY_LEVEL).get()
         S.QUANTITY = S.S_QUANTITY
@@ -62,7 +57,10 @@ def new_order_transaction(c_id, w_id, d_id, num_items, item_number, supplier_war
         item_output_strings.append(f"Quantity: {quantity[i]}")
         item_output_strings.append(f"Order-line amount: {ITEM_AMOUNT}")
         item_output_strings.append(f"Stock quantity: {ADJUSTED_QTY}")
+    order = CustomerOrder.create(O_ID=N, O_D_ID=d_id, O_W_ID=w_id, O_C_ID=c_id, O_ENTRY_D=datetime.now(), O_OL_CNT=num_items, O_ALL_LOCAL=status)
+    CustomerOrderByCID.create(O_ID=N, O_D_ID=d_id, O_W_ID=w_id, O_C_ID=c_id, O_ENTRY_D=order.O_ENTRY_D, O_OL_CNT=num_items, O_ALL_LOCAL=status)
     TOTAL_AMOUNT = TOTAL_AMOUNT * (1 + W.W_TAX + D.D_TAX) * (1 - C.C_DISCOUNT)
+    print(f"Order number: {N}. Entry date: {order.O_ENTRY_D}")
     print(f"Number of Items: {num_items}. Total amount: {TOTAL_AMOUNT}")
     print("\n".join(item_output_strings))
 
