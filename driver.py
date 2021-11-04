@@ -37,7 +37,7 @@ def main():
                               median_transaction_latency,
                               percentile_95_transaction_latency,
                               percentile_99_transaction_latency])
-    print('performance statistics have been written to results/{client_number}.csv')
+    print(f'performance statistics have been written to results/{client_number}.csv')
     
 def execute_transaction(file_path):
     with open(file_path) as file:
