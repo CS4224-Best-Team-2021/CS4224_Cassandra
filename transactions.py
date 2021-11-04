@@ -168,7 +168,7 @@ def popular_item_transaction(w_id, d_id, num_last_orders):
 
 def top_balance_transaction():
     # Processing steps
-    customers = Customer.all()
+    customers = Customer.all().limit(300000)
     sorted_customers = sorted(customers, key=lambda x: x.C_BALANCE, reverse=True)
     # Print output
     for customer in sorted_customers[:10]:
