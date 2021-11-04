@@ -16,10 +16,8 @@ def main():
     # TODO: Handle client numbers and file path more generally
     print('executing transactions...')
     
-    try:
-        execute_transaction(f'project_files_4/xact_files_{experiment_number}/{client_number}.txt')
-    except Exception as e:
-        print(e)
+    execute_transaction(f'project_files_4/xact_files_{experiment_number}/{client_number}.txt')
+
     # Compute performance statistics
     print('computing performance statistics...')
     number_of_transactions_executed = len(transaction_times)
@@ -53,46 +51,47 @@ def execute_transaction(file_path):
             transaction_type = line_parts[0].strip()
             
             start_time = time.time()
-            
-            if transaction_type == "N":
-                c_id,w_id,d_id, M = line_parts[1:]
-                num_items = int(M)
-                item_number = []
-                supplier_warehouse = []
-                quantity = []
-                
-                for _ in range(num_items):
-                    line = file.readline()
-                    line_parts = line.split(',')
-                    params = [eval(param) for param in line_parts]
-                    item_number.append(params[0])
-                    supplier_warehouse.append(params[1])
-                    quantity.append(params[2])
+            try:
+                if transaction_type == "N":
+                    c_id,w_id,d_id, M = line_parts[1:]
+                    num_items = int(M)
+                    item_number = []
+                    supplier_warehouse = []
+                    quantity = []
                     
-                new_order_transaction(int(c_id), int(w_id), int(d_id), num_items, item_number, supplier_warehouse, quantity)
-            elif transaction_type == "P":
-                c_w_id, c_d_id, c_id, payment = line_parts[1:]
-                payment_transaction(int(c_w_id), int(c_d_id), int(c_id), float(payment))
-            elif transaction_type == "D":
-                w_id, carrier_id = line_parts[1:]
-                delivery_transaction(int(w_id), int(carrier_id))
-            elif transaction_type == "O":
-                c_w_id, c_d_id, c_id = line_parts[1:]
-                order_status_transaction(int(c_w_id), int(c_d_id), int(c_id))
-            elif transaction_type == "S":
-                w_id, d_id, T, L = line_parts[1:]
-                stock_level_transaction(int(w_id), int(d_id), int(T), int(L))
-            elif transaction_type == "I":
-                w_id, d_id, L = line_parts[1:]
-                popular_item_transaction(int(w_id), int(d_id), int(L))
-            elif transaction_type == "T":
-                top_balance_transaction()
-            elif transaction_type == "R":
-                c_w_id, c_d_id, c_id = line_parts[1:]
-                related_customer_transaction(int(c_w_id), int(c_d_id), int(c_id))
-            else:
-                raise ValueError(f"Invalid transaction type specified. Error occured when parsing the following line: {line_parts}")
-            
+                    for _ in range(num_items):
+                        line = file.readline()
+                        line_parts = line.split(',')
+                        params = [eval(param) for param in line_parts]
+                        item_number.append(params[0])
+                        supplier_warehouse.append(params[1])
+                        quantity.append(params[2])
+                        
+                    new_order_transaction(int(c_id), int(w_id), int(d_id), num_items, item_number, supplier_warehouse, quantity)
+                elif transaction_type == "P":
+                    c_w_id, c_d_id, c_id, payment = line_parts[1:]
+                    payment_transaction(int(c_w_id), int(c_d_id), int(c_id), float(payment))
+                elif transaction_type == "D":
+                    w_id, carrier_id = line_parts[1:]
+                    delivery_transaction(int(w_id), int(carrier_id))
+                elif transaction_type == "O":
+                    c_w_id, c_d_id, c_id = line_parts[1:]
+                    order_status_transaction(int(c_w_id), int(c_d_id), int(c_id))
+                elif transaction_type == "S":
+                    w_id, d_id, T, L = line_parts[1:]
+                    stock_level_transaction(int(w_id), int(d_id), int(T), int(L))
+                elif transaction_type == "I":
+                    w_id, d_id, L = line_parts[1:]
+                    popular_item_transaction(int(w_id), int(d_id), int(L))
+                elif transaction_type == "T":
+                    top_balance_transaction()
+                elif transaction_type == "R":
+                    c_w_id, c_d_id, c_id = line_parts[1:]
+                    related_customer_transaction(int(c_w_id), int(c_d_id), int(c_id))
+                else:
+                    print(f"Invalid transaction type specified. Error occured when parsing the following line: {line_parts}")
+            except Exception as e:
+                print(e)
             transaction_time = time.time() - start_time
             transaction_times.append(transaction_time)
         
