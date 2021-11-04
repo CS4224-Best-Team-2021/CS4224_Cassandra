@@ -17,13 +17,15 @@ def main():
     top_balance_transaction()
     related_customer_transaction(1, 1, 1)
 
+# READ_CONSISTENCY_LEVEL = ConsistencyLevel.LOCAL_QUORUM
+# WRITE_CONSISTENCY_LEVEL = ConsistencyLevel.LOCAL_QUORUM
 READ_CONSISTENCY_LEVEL = ConsistencyLevel.ONE
 WRITE_CONSISTENCY_LEVEL = ConsistencyLevel.ALL
 
 # Note: We will need to pass in parameters to most of these functions
 # Write-heavy transactions
 def new_order_transaction(c_id, w_id, d_id, num_items, item_number, supplier_warehouse, quantity):
-    print("New order transaction")
+    # print("New order transaction")
     D = District.filter(D_W_ID=w_id, D_ID=d_id).consistency(READ_CONSISTENCY_LEVEL).get()
     W = Warehouse.filter(W_ID=w_id).consistency(READ_CONSISTENCY_LEVEL).get()
     C = Customer.filter(C_W_ID=w_id, C_D_ID=d_id, C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL).get()
@@ -64,7 +66,7 @@ def new_order_transaction(c_id, w_id, d_id, num_items, item_number, supplier_war
     print("\n".join(item_output_strings))
 
 def payment_transaction(c_w_id, c_d_id, c_id, payment):
-    print("Payment transaction")
+    # print("Payment transaction")
     C = Customer.filter(C_W_ID=c_w_id, C_D_ID=c_d_id, C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL).get()
     W = Warehouse.filter(W_ID=c_w_id).consistency(READ_CONSISTENCY_LEVEL).get()
     D = District.filter(D_W_ID=c_w_id, D_ID=c_d_id).consistency(READ_CONSISTENCY_LEVEL).get()
@@ -78,7 +80,7 @@ def payment_transaction(c_w_id, c_d_id, c_id, payment):
     print(f"Payment: {payment}")
 
 def delivery_transaction(w_id, carrier_id):
-    print("Delivery transaction")
+    # print("Delivery transaction")
     for i in range(1, 11):
         D = District.filter(D_W_ID=w_id, D_ID=i).consistency(READ_CONSISTENCY_LEVEL).get()
         X = CustomerOrder.filter(O_W_ID=w_id, O_D_ID=i, O_CARRIER_ID=-1).consistency(READ_CONSISTENCY_LEVEL).allow_filtering().order_by('O_ID').first()
@@ -95,7 +97,7 @@ def delivery_transaction(w_id, carrier_id):
 
 # Read-heavy transactions
 def order_status_transaction(c_w_id, c_d_id, c_id):
-    print("Order status transaction")
+    # print("Order status transaction")
     C = Customer.filter(C_W_ID=c_w_id, C_D_ID=c_d_id, C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL).get()
     print(f"Customer: {C.C_FIRST}, {C.C_MIDDLE}, {C.C_LAST}, {C.C_BALANCE}")
     O = CustomerOrder.filter(O_W_ID=c_w_id, O_D_ID=c_d_id, O_C_ID=c_id).consistency(READ_CONSISTENCY_LEVEL).allow_filtering().order_by('O_ID')[-1]
