@@ -84,6 +84,8 @@ def delivery_transaction(w_id, carrier_id):
     # print("Delivery transaction")
     for i in range(1, 11):
         X = CustomerOrder.filter(O_W_ID=w_id, O_D_ID=i, O_CARRIER_ID=-1).consistency(READ_CONSISTENCY_LEVEL).allow_filtering().order_by('O_ID').first()
+        if not X:
+            continue
         Y = CustomerOrderByCID.filter(O_W_ID=w_id, O_D_ID=i, O_ID=X.O_ID).consistency(READ_CONSISTENCY_LEVEL).get()
         C = Customer.filter(C_W_ID=X.O_W_ID, C_D_ID=X.O_D_ID, C_ID=X.O_C_ID).get()
         X.update(O_CARRIER_ID=carrier_id)

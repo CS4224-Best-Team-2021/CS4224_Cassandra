@@ -15,8 +15,11 @@ def main():
         
     # TODO: Handle client numbers and file path more generally
     print('executing transactions...')
-    execute_transaction(f'project_files_4/xact_files_{experiment_number}/{client_number}.txt')
     
+    try:
+        execute_transaction(f'project_files_4/xact_files_{experiment_number}/{client_number}.txt')
+    except Exception as e:
+        print(e)
     # Compute performance statistics
     print('computing performance statistics...')
     number_of_transactions_executed = len(transaction_times)
