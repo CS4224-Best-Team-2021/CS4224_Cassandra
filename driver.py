@@ -34,6 +34,7 @@ def main():
         file_writer.writerow([client_number,
                               number_of_transactions_executed,
                               total_transaction_execution_time,
+                              transaction_throughput,
                               average_transaction_latency,
                               median_transaction_latency,
                               percentile_95_transaction_latency,
