@@ -18,7 +18,7 @@ def main():
         if len(usr_in) == 0:
             print(f"No input detected. {MESSAGE_REENTER_IP_ADDRESSES}")
             continue
-        if usr_in.toLowerCase() == "exit":
+        if usr_in.lower() == "exit":
             return
         args = list(map(lambda x: x.strip(), usr_in.split(",")))
         IP_ADDRESSES = []
