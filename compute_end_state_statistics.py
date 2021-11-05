@@ -11,10 +11,10 @@ def main():
     # Get all the records needed
     warehouses = Warehouse.all()
     districts = District.all()
-    customers = Customer.all()
-    customer_orders = CustomerOrder.all()
-    order_lines = OrderLine.all()
-    stocks = Stock.all()
+    customers = Customer.all().limit(300000)
+    customer_orders = CustomerOrder.all().limit(600000)
+    order_lines = OrderLine.all().limit(8000000)
+    stocks = Stock.all().limit(1000000)
 
     # Compute end state statistics
     end_state_statistics = [0] * 15
@@ -30,7 +30,7 @@ def main():
         end_state_statistics[6] += customer.C_DELIVERY_CNT
     for customer_order in customer_orders:
         max_OID_so_far = end_state_statistics[7] 
-        end_state_statistics[7] += max(customer_order.O_ID, max_OID_so_far)
+        end_state_statistics[7] = max(customer_order.O_ID, max_OID_so_far)
         end_state_statistics[8] += customer_order.O_OL_CNT 
     for order_line in order_lines:
         end_state_statistics[9] += order_line.OL_AMOUNT 
