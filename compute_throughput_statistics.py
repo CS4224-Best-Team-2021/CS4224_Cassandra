@@ -6,7 +6,7 @@ def main():
         file_reader = csv.reader(f, delimiter=',')
         throughputs = []
         for row in file_reader:
-            transaction_throughput = float(row[2])
+            transaction_throughput = float(row[3])
             throughputs.append(transaction_throughput)
         min_throughput = min(throughputs)
         max_throughput = max(throughputs)
