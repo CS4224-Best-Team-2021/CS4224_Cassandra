@@ -23,11 +23,11 @@ def main():
     number_of_transactions_executed = len(transaction_times)
     total_transaction_execution_time = sum(transaction_times)
     transaction_throughput = number_of_transactions_executed / total_transaction_execution_time
-    average_transaction_latency = 1 / transaction_throughput
+    average_transaction_latency = 1 / transaction_throughput * 1000
     sorted_transaction_times = sorted(transaction_times)
-    median_transaction_latency = sorted_transaction_times[number_of_transactions_executed // 2]
-    percentile_95_transaction_latency = sorted_transaction_times[int(number_of_transactions_executed * 0.95)]
-    percentile_99_transaction_latency = sorted_transaction_times[int(number_of_transactions_executed * 0.99)]
+    median_transaction_latency = sorted_transaction_times[number_of_transactions_executed // 2] * 1000
+    percentile_95_transaction_latency = sorted_transaction_times[int(number_of_transactions_executed * 0.95)] * 1000
+    percentile_99_transaction_latency = sorted_transaction_times[int(number_of_transactions_executed * 0.99)] * 1000
     
     with open(f'results/{client_number}.csv', 'w') as f:
         file_writer = csv.writer(f)
